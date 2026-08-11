@@ -1,5 +1,6 @@
 import { Component, type ReactNode } from 'react'
 import { BrowserRouter, Route, Routes } from 'react-router-dom'
+import { SmoothScroll } from '@/components/smooth-scroll'
 import LandingPage from '@/pages/landing'
 import GeneratePage from '@/pages/generate'
 import ResultsPage from '@/pages/results'
@@ -46,13 +47,15 @@ export default function App() {
   return (
     <ErrorBoundary>
       <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<LandingPage />} />
-          <Route path="/generate" element={<GeneratePage />} />
-          <Route path="/results/:id" element={<ResultsPage />} />
-          <Route path="/feedback" element={<FeedbackPage />} />
-          <Route path="*" element={<NotFoundPage />} />
-        </Routes>
+        <SmoothScroll>
+          <Routes>
+            <Route path="/" element={<LandingPage />} />
+            <Route path="/generate" element={<GeneratePage />} />
+            <Route path="/results/:id" element={<ResultsPage />} />
+            <Route path="/feedback" element={<FeedbackPage />} />
+            <Route path="*" element={<NotFoundPage />} />
+          </Routes>
+        </SmoothScroll>
       </BrowserRouter>
     </ErrorBoundary>
   )

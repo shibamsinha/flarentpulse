@@ -17,6 +17,7 @@ import {
 import { Button } from '@/components/ui/button'
 import { EarlyAccessBadge, SiteFooter, SiteHeader } from '@/components/brand'
 import { FeedbackForm } from '@/components/feedback-form'
+import { scrollToTop } from '@/components/smooth-scroll'
 import { TabBar, TabPanel, type TabDef } from '@/components/results/tabs'
 import {
   CalendarPanel,
@@ -109,8 +110,10 @@ export default function ResultsPage() {
     }
   }, [id])
 
+  // Hand the scroll to Lenis so switching tabs glides back up rather than
+  // snapping — and so it doesn't fight the smooth-scroll loop.
   useEffect(() => {
-    window.scrollTo({ top: 0 })
+    scrollToTop()
   }, [activeTab])
 
   if (state.status === 'loading') {

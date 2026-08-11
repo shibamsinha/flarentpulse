@@ -16,6 +16,7 @@ import { SplineScene } from '@/components/ui/splite'
 import { Spotlight } from '@/components/ui/spotlight'
 import { EarlyAccessBadge, SiteFooter, SiteHeader } from '@/components/brand'
 import { DashboardPreview } from '@/components/dashboard-preview'
+import { Reveal } from '@/components/reveal'
 
 const deliverables = [
   {
@@ -120,17 +121,19 @@ export default function LandingPage() {
             <h2 className="mt-3 max-w-lg text-[28px] font-semibold leading-tight tracking-tighter text-ink-900 sm:text-[34px]">
               Three steps, and you have a month of marketing.
             </h2>
-            <ol className="mt-10 grid gap-px overflow-hidden rounded-xl border border-ink-200/80 bg-ink-200/70 sm:grid-cols-3">
-              {steps.map((step, index) => (
-                <li key={step.title} className="bg-white p-6 sm:p-7">
-                  <span className="inline-flex h-7 w-7 items-center justify-center rounded-full border border-ink-200 text-[13px] font-medium text-ink-500">
-                    {index + 1}
-                  </span>
-                  <h3 className="mt-4 text-[15px] font-semibold text-ink-900">{step.title}</h3>
-                  <p className="mt-2 text-[14px] leading-relaxed text-ink-500">{step.body}</p>
-                </li>
-              ))}
-            </ol>
+            <Reveal>
+              <ol className="mt-10 grid gap-px overflow-hidden rounded-xl border border-ink-200/80 bg-ink-200/70 sm:grid-cols-3">
+                {steps.map((step, index) => (
+                  <li key={step.title} className="bg-white p-6 sm:p-7">
+                    <span className="inline-flex h-7 w-7 items-center justify-center rounded-full border border-ink-200 text-[13px] font-medium text-ink-500">
+                      {index + 1}
+                    </span>
+                    <h3 className="mt-4 text-[15px] font-semibold text-ink-900">{step.title}</h3>
+                    <p className="mt-2 text-[14px] leading-relaxed text-ink-500">{step.body}</p>
+                  </li>
+                ))}
+              </ol>
+            </Reveal>
           </div>
         </section>
 
@@ -145,17 +148,16 @@ export default function LandingPage() {
             </h2>
 
             <div className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-              {deliverables.map(({ icon: Icon, title, body }) => (
-                <div
-                  key={title}
-                  className="group rounded-xl border border-ink-200/80 bg-white p-6 shadow-subtle transition-all duration-200 hover:-translate-y-0.5 hover:border-ink-300 hover:shadow-card"
-                >
-                  <span className="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-ink-200/80 bg-ink-50 text-ink-600 transition-colors group-hover:border-accent-200 group-hover:bg-accent-50 group-hover:text-accent-600">
-                    <Icon className="h-4 w-4" />
-                  </span>
-                  <h3 className="mt-4 text-[15px] font-semibold text-ink-900">{title}</h3>
-                  <p className="mt-2 text-[14px] leading-relaxed text-ink-500">{body}</p>
-                </div>
+              {deliverables.map(({ icon: Icon, title, body }, index) => (
+                <Reveal key={title} delay={index * 60}>
+                  <div className="group h-full rounded-xl border border-ink-200/80 bg-white p-6 shadow-subtle transition-all duration-200 hover:-translate-y-0.5 hover:border-ink-300 hover:shadow-card">
+                    <span className="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-ink-200/80 bg-ink-50 text-ink-600 transition-colors group-hover:border-accent-200 group-hover:bg-accent-50 group-hover:text-accent-600">
+                      <Icon className="h-4 w-4" />
+                    </span>
+                    <h3 className="mt-4 text-[15px] font-semibold text-ink-900">{title}</h3>
+                    <p className="mt-2 text-[14px] leading-relaxed text-ink-500">{body}</p>
+                  </div>
+                </Reveal>
               ))}
               <div className="flex flex-col justify-between rounded-xl border border-dashed border-ink-300/80 bg-white/60 p-6">
                 <p className="text-[14px] leading-relaxed text-ink-500">
@@ -194,15 +196,17 @@ export default function LandingPage() {
                 next moves a good consultant would give you.
               </p>
             </div>
-            <div className="grid gap-px self-start overflow-hidden rounded-xl border border-ink-200/80 bg-ink-200/70 sm:grid-cols-2">
-              {inputs.map(({ icon: Icon, label, body }) => (
-                <div key={label} className="bg-white p-6">
-                  <Icon className="h-4 w-4 text-ink-400" />
-                  <h3 className="mt-3 text-[14px] font-semibold text-ink-900">{label}</h3>
-                  <p className="mt-1.5 text-[13px] leading-relaxed text-ink-500">{body}</p>
-                </div>
-              ))}
-            </div>
+            <Reveal delay={80} className="self-start">
+              <div className="grid gap-px overflow-hidden rounded-xl border border-ink-200/80 bg-ink-200/70 sm:grid-cols-2">
+                {inputs.map(({ icon: Icon, label, body }) => (
+                  <div key={label} className="bg-white p-6">
+                    <Icon className="h-4 w-4 text-ink-400" />
+                    <h3 className="mt-3 text-[14px] font-semibold text-ink-900">{label}</h3>
+                    <p className="mt-1.5 text-[13px] leading-relaxed text-ink-500">{body}</p>
+                  </div>
+                ))}
+              </div>
+            </Reveal>
           </div>
         </section>
 

@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button'
 import { TextAreaField, TextField } from '@/components/ui/field'
 import { EarlyAccessBadge, SiteFooter, SiteHeader } from '@/components/brand'
 import { GeneratingOverlay } from '@/components/generating-overlay'
+import { scrollToElement } from '@/components/smooth-scroll'
 import { GenerationError, generateGrowthPack } from '@/lib/api'
 import { saveGeneration } from '@/lib/storage'
 import { cn } from '@/lib/utils'
@@ -111,9 +112,8 @@ export default function GeneratePage() {
       }
       setErrors(nextErrors)
       const firstKey = Object.keys(nextErrors)[0]
-      document
-        .querySelector(`[data-field="${firstKey}"]`)
-        ?.scrollIntoView({ behavior: 'smooth', block: 'center' })
+      const firstField = document.querySelector(`[data-field="${firstKey}"]`)
+      if (firstField) scrollToElement(firstField)
       return
     }
 
@@ -130,7 +130,9 @@ export default function GeneratePage() {
           ? error.message
           : 'Something went wrong on our side. Please try again in a moment.',
       )
-      window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' })
+      window.__lenis
+        ? window.__lenis.scrollTo(document.body.scrollHeight)
+        : window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' })
     }
   }
 
