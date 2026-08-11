@@ -1,0 +1,20 @@
+[build]
+  command = "npm run build"
+  publish = "dist"
+  functions = "netlify/functions"
+
+[functions]
+  node_bundler = "esbuild"
+
+# The function declares `config.path = "/api/generate"`, this redirect keeps the
+# same URL working for older Netlify runtimes and for `netlify dev`.
+[[redirects]]
+  from = "/api/*"
+  to = "/.netlify/functions/:splat"
+  status = 200
+
+# SPA fallback so /generate, /results/:id and /feedback resolve on reload.
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
