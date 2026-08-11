@@ -11,6 +11,9 @@ import {
   Users,
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import { Card } from '@/components/ui/card'
+import { SplineScene } from '@/components/ui/splite'
+import { Spotlight } from '@/components/ui/spotlight'
 import { EarlyAccessBadge, SiteFooter, SiteHeader } from '@/components/brand'
 import { DashboardPreview } from '@/components/dashboard-preview'
 
@@ -205,27 +208,40 @@ export default function LandingPage() {
 
         {/* Closing CTA */}
         <section className="mx-auto max-w-6xl px-5 py-20 sm:px-8 sm:py-24">
-          <div className="relative overflow-hidden rounded-2xl border border-ink-800 bg-ink-950 px-6 py-14 text-center sm:px-12">
-            <div className="pointer-events-none absolute inset-0 opacity-[0.18] [background:radial-gradient(60%_60%_at_50%_0%,#818cf8,transparent_70%)]" />
-            <div className="relative">
-              <h2 className="mx-auto max-w-xl text-[28px] font-semibold leading-tight tracking-tighter text-white sm:text-[34px]">
-                Your growth pack is two minutes away.
-              </h2>
-              <p className="mx-auto mt-4 max-w-md text-[15px] leading-relaxed text-ink-300">
-                Practical marketing ideas, content and campaigns — personalized for your business.
-              </p>
-              <Link to="/generate" className="mt-8 inline-block">
-                <Button
-                  size="lg"
-                  className="group bg-white text-ink-900 hover:bg-ink-100 active:bg-ink-200"
-                >
-                  Build My Growth Pack
-                  <ArrowRight className="h-4 w-4 transition-transform duration-200 group-hover:translate-x-0.5" />
-                </Button>
-              </Link>
-              <p className="mt-4 text-[13px] text-ink-400">Free early access</p>
+          <Card className="relative w-full overflow-hidden border-ink-800 bg-ink-950 shadow-lift">
+            <Spotlight className="-top-40 left-0 md:-top-20 md:left-60" fill="white" />
+
+            <div className="flex flex-col md:h-[460px] md:flex-row">
+              <div className="relative z-10 flex flex-1 flex-col justify-center px-6 py-12 sm:px-10">
+                <h2 className="max-w-md bg-gradient-to-b from-neutral-50 to-neutral-400 bg-clip-text text-[30px] font-semibold leading-tight tracking-tighter text-transparent sm:text-[36px]">
+                  Your growth pack is two minutes away.
+                </h2>
+                <p className="mt-4 max-w-md text-[15px] leading-relaxed text-ink-300">
+                  Practical marketing ideas, content and campaigns — personalized for your
+                  business.
+                </p>
+                <div className="mt-8 flex flex-wrap items-center gap-4">
+                  <Link to="/generate">
+                    <Button
+                      size="lg"
+                      className="group bg-white text-ink-900 hover:bg-ink-100 active:bg-ink-200"
+                    >
+                      Build My Growth Pack
+                      <ArrowRight className="h-4 w-4 transition-transform duration-200 group-hover:translate-x-0.5" />
+                    </Button>
+                  </Link>
+                  <span className="text-[13px] text-ink-400">Free early access</span>
+                </div>
+              </div>
+
+              <div className="relative h-[260px] flex-1 md:h-auto">
+                <SplineScene
+                  scene="https://prod.spline.design/kZDDjO5HuC9GJUM2/scene.splinecode"
+                  className="h-full w-full"
+                />
+              </div>
             </div>
-          </div>
+          </Card>
         </section>
       </main>
 
