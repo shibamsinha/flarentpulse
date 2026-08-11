@@ -277,7 +277,14 @@ export default function ResultsPage() {
         </TabPanel>
 
         <div className="border-t border-ink-200/70 py-10 sm:py-14">
-          <FeedbackForm generationId={record.id} />
+          <FeedbackForm
+            generationId={record.id}
+            context={{
+              businessName: business.businessName,
+              industry: business.industry,
+              location: business.location,
+            }}
+          />
         </div>
       </div>
     </Shell>

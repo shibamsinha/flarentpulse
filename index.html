@@ -18,6 +18,25 @@
     />
   </head>
   <body>
+    <!--
+      Netlify detects forms by parsing the deployed HTML at build time, and a
+      React-rendered form is invisible to that parser. This hidden copy is the
+      declaration: it registers the form and its fields. The real submission is
+      an encoded POST from src/components/feedback-form.tsx, and the field names
+      below must stay in step with it.
+    -->
+    <form name="pulse-feedback" data-netlify="true" netlify-honeypot="bot-field" hidden>
+      <input type="hidden" name="form-name" value="pulse-feedback" />
+      <input type="text" name="bot-field" />
+      <input type="text" name="rating" />
+      <textarea name="comment"></textarea>
+      <input type="text" name="generation_id" />
+      <input type="text" name="business_name" />
+      <input type="text" name="industry" />
+      <input type="text" name="location" />
+      <input type="text" name="page" />
+    </form>
+
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
   </body>

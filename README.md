@@ -47,14 +47,31 @@ ones reach the browser.
 
 ## Database
 
-Run `supabase/schema.sql` once in the Supabase SQL editor. It creates `businesses`, `generations`
-and `feedback`, and enables row level security:
+Run `supabase/schema.sql` once in the Supabase SQL editor. It creates `businesses` and
+`generations`, and enables row level security:
 
-- anyone may insert a business, a generation and feedback;
+- anyone may insert a business and a generation;
 - a generation is readable only by someone who already has its unguessable UUID;
-- `businesses` and `feedback` are not readable with the anon key at all.
+- `businesses` is not readable with the anon key at all.
 
 No login, no personal contact details are collected.
+
+## Feedback
+
+The feedback form posts to **Netlify Forms** under the name `pulse-feedback`. Submissions appear in
+the Netlify dashboard under **Forms → pulse-feedback**, and can be exported as CSV or forwarded by
+email or webhook from **Forms → Settings → Form notifications**.
+
+Each submission carries the rating, the comment, and the context needed to make sense of it: the
+generation id, and the business name, industry and location when it was sent from a results page.
+
+Netlify discovers forms by parsing the deployed HTML at build time, which a React-rendered form
+never appears in — so `index.html` holds a hidden declaration form listing the field names. **If you
+add or rename a field in `feedback-form.tsx`, change it in `index.html` too**, or the new field is
+dropped on submission.
+
+Locally there is no Netlify to receive the post, so a dev-only middleware in `vite.config.ts`
+accepts it and prints the submission to the terminal instead.
 
 ## Deploying to Netlify
 

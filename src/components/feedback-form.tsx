@@ -1,21 +1,32 @@
 import { useState, type FormEvent } from 'react'
 import { AlertTriangle, CheckCircle2, Star } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import { saveFeedback } from '@/lib/storage'
 import { cn } from '@/lib/utils'
 
 const RATING_LABELS = ['Not useful', 'Slightly useful', 'Useful', 'Very useful', 'Excellent']
 
+/** Must match the hidden declaration form in index.html. */
+const FORM_NAME = 'pulse-feedback'
+
+export type FeedbackContext = {
+  businessName?: string
+  industry?: string
+  location?: string
+}
+
 export function FeedbackForm({
   generationId,
+  context,
   className,
 }: {
   generationId: string | null
+  context?: FeedbackContext
   className?: string
 }) {
   const [rating, setRating] = useState(0)
   const [hovered, setHovered] = useState(0)
   const [comment, setComment] = useState('')
+  const [botField, setBotField] = useState('')
   const [status, setStatus] = useState<'idle' | 'sending' | 'sent' | 'error'>('idle')
   const [error, setError] = useState<string | null>(null)
 
@@ -28,8 +39,30 @@ export function FeedbackForm({
 
     setStatus('sending')
     setError(null)
+
+    // Netlify Forms expects a urlencoded POST carrying `form-name`. Sending it
+    // to the current path keeps it inside the deploy, which is what the form
+    // handler looks for.
+    const body = new URLSearchParams({
+      'form-name': FORM_NAME,
+      'bot-field': botField,
+      rating: String(rating),
+      comment: comment.trim(),
+      generation_id: generationId ?? '',
+      business_name: context?.businessName ?? '',
+      industry: context?.industry ?? '',
+      location: context?.location ?? '',
+      page: window.location.pathname,
+    })
+
     try {
-      await saveFeedback(generationId ?? 'unknown', rating, comment)
+      const response = await fetch('/', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: body.toString(),
+      })
+
+      if (!response.ok) throw new Error(`Netlify Forms responded ${response.status}`)
       setStatus('sent')
     } catch (submitError) {
       console.error('[feedback] submission failed:', submitError)
@@ -64,9 +97,30 @@ export function FeedbackForm({
 
   return (
     <form
+      name={FORM_NAME}
+      method="POST"
+      data-netlify="true"
+      netlify-honeypot="bot-field"
       onSubmit={handleSubmit}
       className={cn('rounded-xl border border-ink-200/80 bg-white p-6 shadow-subtle sm:p-8', className)}
     >
+      <input type="hidden" name="form-name" value={FORM_NAME} />
+
+      {/* Honeypot: invisible to people, irresistible to bots. */}
+      <p className="hidden" aria-hidden="true">
+        <label>
+          Leave this field empty
+          <input
+            type="text"
+            name="bot-field"
+            tabIndex={-1}
+            autoComplete="off"
+            value={botField}
+            onChange={(event) => setBotField(event.target.value)}
+          />
+        </label>
+      </p>
+
       <h2 className="text-[19px] font-semibold tracking-tight text-ink-900">
         Help us make Pulse better.
       </h2>

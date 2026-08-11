@@ -14,6 +14,36 @@ function apiDevServer(): Plugin {
     name: 'flarent-pulse-api-dev',
     apply: 'serve',
     configureServer(server) {
+      // Netlify Forms intercepts the urlencoded POST that the feedback form
+      // sends. Vite has no such handler and answers 404, so locally the form
+      // could only ever show its error state. Stand in for it: log the
+      // submission and accept it, the way the deployed site does.
+      server.middlewares.use(async (req, res, next) => {
+        const contentType = req.headers['content-type'] ?? ''
+        if (req.method !== 'POST' || !contentType.includes('application/x-www-form-urlencoded')) {
+          return next()
+        }
+
+        const chunks: Buffer[] = []
+        for await (const chunk of req) chunks.push(chunk as Buffer)
+        const fields = new URLSearchParams(Buffer.concat(chunks).toString('utf8'))
+
+        if (!fields.get('form-name')) return next()
+
+        server.config.logger.info(
+          `\n[netlify-forms:dev] "${fields.get('form-name')}" submission\n` +
+            [...fields.entries()]
+              .filter(([key, value]) => key !== 'form-name' && value)
+              .map(([key, value]) => `  ${key}: ${value}`)
+              .join('\n') +
+            '\n  (in production this is captured by Netlify Forms)\n',
+        )
+
+        res.statusCode = 200
+        res.setHeader('content-type', 'text/plain')
+        res.end('OK')
+      })
+
       server.middlewares.use('/api/generate', async (req, res) => {
         if (req.method !== 'POST') {
           res.statusCode = 405

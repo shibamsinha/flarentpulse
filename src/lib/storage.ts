@@ -145,26 +145,3 @@ export async function getGeneration(id: string): Promise<StoredGeneration | null
   const parsed = growthPackSchema.safeParse(local.pack)
   return parsed.success ? { ...local, pack: parsed.data } : null
 }
-
-export async function saveFeedback(
-  generationId: string,
-  rating: number,
-  comment: string,
-): Promise<void> {
-  if (!supabase) {
-    // Nothing to write to — resolve quietly so the UI can still thank the user.
-    console.info('[storage] feedback recorded locally only (Supabase not configured)', {
-      generationId,
-      rating,
-    })
-    return
-  }
-
-  const { error } = await supabase.from('feedback').insert({
-    generation_id: generationId,
-    rating,
-    comment: comment.trim() || null,
-  })
-
-  if (error) throw error
-}
