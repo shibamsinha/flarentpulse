@@ -208,6 +208,26 @@ async function buildPack(apiKey: string, input: BusinessInput): Promise<GrowthPa
 }
 
 /**
+ * Read the key defensively. Pasting a long key into a hosting dashboard often
+ * picks up surrounding quotes or stray whitespace/newlines, which produce a
+ * confusing 401 rather than an obvious configuration error.
+ */
+function readApiKey(): string | undefined {
+  const raw = process.env.OPENAI_API_KEY
+  if (!raw) return undefined
+  const cleaned = raw.trim().replace(/^['"]|['"]$/g, '').replace(/\s+/g, '')
+  return cleaned || undefined
+}
+
+/**
+ * Describe the key without ever logging it: enough to compare against the real
+ * one (length and last four characters) and nothing an attacker could use.
+ */
+function keyFingerprint(key: string): string {
+  return `length ${key.length}, ends "…${key.slice(-4)}", starts "${key.slice(0, 7)}…"`
+}
+
+/**
  * Shared entry point for both the Netlify Function and the Vite dev middleware.
  * Takes the raw request body, returns a status + serialized JSON body.
  */
@@ -227,7 +247,7 @@ export async function handleGenerateRequest(rawBody: string): Promise<HandlerRes
     )
   }
 
-  const apiKey = process.env.OPENAI_API_KEY
+  const apiKey = readApiKey()
   if (!apiKey) {
     // No credentials configured: serve a fully valid sample pack so the product
     // is demoable. The UI labels this clearly.
@@ -249,6 +269,15 @@ export async function handleGenerateRequest(rawBody: string): Promise<HandlerRes
       )
     }
     if (status === 401 || status === 403) {
+      // The most common cause is a mis-set environment variable, so log a
+      // safe fingerprint of the key that was actually used. Compare it with
+      // the real key: a different length means the stored value is truncated
+      // or carries extra characters.
+      console.error(
+        `[generate] the AI provider rejected the credentials. Key in use: ${keyFingerprint(apiKey)}. ` +
+          'Check OPENAI_API_KEY in the host environment — it must be the whole key, unquoted, ' +
+          'scoped to Functions, and the site must have been redeployed since it was set.',
+      )
       return friendlyError(
         502,
         'Pulse is not able to reach its AI service right now. Please try again shortly.',
