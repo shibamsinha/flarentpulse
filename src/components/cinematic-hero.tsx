@@ -10,23 +10,28 @@ import { DashboardPreview } from '@/components/dashboard-preview'
 gsap.registerPlugin(ScrollTrigger)
 
 /**
- * Cinematic scroll hero.
+ * Cinematic hero.
  *
- * The section pins for two and a half viewport heights while a scrubbed
- * timeline plays: the headline wipes in line by line, the product preview
- * rises and settles, then the call to action arrives. Scroll position drives
- * the timeline directly, so scrubbing back up rewinds it.
+ * Two separate things happen, and the distinction matters:
  *
- * Below 768px, and for anyone who has asked for reduced motion, none of this
- * runs — the same markup renders as an ordinary static hero. Pinning the
- * viewport on a phone fights the user for control of the page.
+ * 1. On load, an entrance timeline plays by itself — the headline wipes in line
+ *    by line, the product preview rises and settles, the call to action
+ *    arrives. It is over in about 1.4s without the reader doing anything.
+ *
+ * 2. On scroll, a second scrubbed timeline gives the hero a cinematic exit:
+ *    the copy drifts up and fades, the preview eases back, the grid recedes.
+ *
+ * The entrance is deliberately NOT scroll-driven. A scrubbed intro means the
+ * page renders empty until the reader scrolls, which reads as a broken site.
+ *
+ * Everything uses gsap.from(), so the markup's natural state is the finished
+ * state: if GSAP fails to load or throws, the hero is simply a normal hero.
  */
 export function CinematicHero() {
   const root = useRef<HTMLDivElement>(null)
 
   useLayoutEffect(() => {
     const context = gsap.context(() => {
-      // Keep ScrollTrigger in step with Lenis, which owns the scroll position.
       const lenis = window.__lenis
       lenis?.on('scroll', ScrollTrigger.update)
 
@@ -34,68 +39,61 @@ export function CinematicHero() {
 
       media.add(
         {
-          animated: '(min-width: 768px) and (prefers-reduced-motion: no-preference)',
-          static: '(max-width: 767px), (prefers-reduced-motion: reduce)',
+          animated: '(prefers-reduced-motion: no-preference)',
+          parallax: '(min-width: 768px) and (prefers-reduced-motion: no-preference)',
         },
         (mediaContext) => {
-          const { animated } = mediaContext.conditions as { animated: boolean }
-
-          if (!animated) {
-            // Static: everything at its resting state, nothing pinned.
-            gsap.set('[data-hero-line]', { clipPath: 'inset(0% 0% 0% 0%)', y: 0, opacity: 1 })
-            gsap.set('[data-hero-fade]', { opacity: 1, y: 0 })
-            gsap.set('[data-hero-preview]', { opacity: 1, y: 0, scale: 1 })
-            return
+          const { animated, parallax } = mediaContext.conditions as {
+            animated: boolean
+            parallax: boolean
           }
 
-          const timeline = gsap.timeline({
-            scrollTrigger: {
-              trigger: root.current,
-              start: 'top top',
-              end: '+=250%',
-              pin: true,
-              pinSpacing: true,
-              scrub: 0.8,
-              anticipatePin: 1,
-            },
-            defaults: { ease: 'power2.out' },
-          })
+          if (!animated) return
 
-          timeline
-            // Headline, wiped in one line at a time.
-            .fromTo(
-              '[data-hero-line]',
-              { clipPath: 'inset(0% 100% 0% 0%)', y: 24 },
-              { clipPath: 'inset(0% 0% 0% 0%)', y: 0, duration: 1.1, stagger: 0.5 },
-            )
-            // Supporting copy.
-            .fromTo(
-              '[data-hero-sub]',
-              { opacity: 0, y: 18 },
-              { opacity: 1, y: 0, duration: 0.7 },
-              '-=0.4',
-            )
-            // The product itself: rises, settles, comes into focus.
-            .fromTo(
+          // 1. Entrance — plays immediately, no scrolling required.
+          const intro = gsap
+            .timeline({ defaults: { ease: 'power3.out' } })
+            .from('[data-hero-line]', {
+              clipPath: 'inset(0% 100% 0% 0%)',
+              y: 20,
+              duration: 0.9,
+              stagger: 0.14,
+            })
+            .from('[data-hero-sub]', { opacity: 0, y: 16, duration: 0.6 }, '-=0.55')
+            .from(
               '[data-hero-preview]',
-              { opacity: 0, y: 90, scale: 0.9 },
-              { opacity: 1, y: 0, scale: 1, duration: 1.4 },
+              { opacity: 0, y: 48, scale: 0.96, duration: 0.9 },
               '-=0.5',
             )
-            // Call to action last, once there is something to act on.
-            .fromTo(
-              '[data-hero-cta]',
-              { opacity: 0, y: 16 },
-              { opacity: 1, y: 0, duration: 0.7 },
-              '-=0.7',
-            )
-            // The dotted grid drifts and fades as the sequence closes.
-            .fromTo(
-              '[data-hero-grid]',
-              { opacity: 1, y: 0 },
-              { opacity: 0.35, y: -40, duration: 1.4 },
-              0,
-            )
+            .from('[data-hero-cta]', { opacity: 0, y: 14, duration: 0.6 }, '-=0.6')
+
+          // The entrance starts by hiding things. If it were ever to stall —
+          // a suspended ticker, a throttled tab — the hero would sit blank,
+          // which is precisely the failure this rewrite exists to prevent.
+          // setTimeout keeps running when rAF does not, so it can finish the
+          // job by hand.
+          const failsafe = window.setTimeout(() => {
+            if (intro.progress() < 1) intro.progress(1)
+          }, 2500)
+
+          // 2. Departure — scrubbed against scroll as the hero leaves.
+          if (parallax) {
+            gsap
+              .timeline({
+                scrollTrigger: {
+                  trigger: root.current,
+                  start: 'top top',
+                  end: 'bottom top',
+                  scrub: 0.6,
+                },
+                defaults: { ease: 'none' },
+              })
+              .to('[data-hero-copy]', { y: -70, opacity: 0.15 }, 0)
+              .to('[data-hero-preview]', { y: -30, scale: 0.97, opacity: 0.35 }, 0)
+              .to('[data-hero-grid]', { y: -50, opacity: 0.3 }, 0)
+          }
+
+          return () => window.clearTimeout(failsafe)
         },
       )
 
@@ -105,8 +103,7 @@ export function CinematicHero() {
       }
     }, root)
 
-    // A late-loading webfont changes the headline's height and therefore every
-    // trigger position. Recalculate once it settles.
+    // A late webfont changes the headline height and every trigger position.
     document.fonts?.ready.then(() => ScrollTrigger.refresh())
 
     return () => context.revert()
@@ -115,16 +112,16 @@ export function CinematicHero() {
   return (
     <section
       ref={root}
-      className="relative flex min-h-dvh items-center overflow-hidden border-b border-ink-200/70"
+      className="relative overflow-hidden border-b border-ink-200/70"
     >
       <div
         data-hero-grid
         className="pointer-events-none absolute inset-0 bg-grid [mask-image:radial-gradient(70%_55%_at_50%_0%,black,transparent)]"
       />
 
-      <div className="relative mx-auto grid w-full max-w-6xl gap-12 px-5 py-16 sm:px-8 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.05fr)] lg:items-center lg:gap-14">
-        <div>
-          <div data-hero-fade data-hero-sub>
+      <div className="relative mx-auto grid max-w-6xl gap-12 px-5 py-16 sm:px-8 sm:py-20 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.05fr)] lg:items-center lg:gap-14 lg:py-24">
+        <div data-hero-copy>
+          <div data-hero-sub>
             <EarlyAccessBadge />
           </div>
 
@@ -138,7 +135,6 @@ export function CinematicHero() {
           </h1>
 
           <p
-            data-hero-fade
             data-hero-sub
             className="mt-5 max-w-md text-[16px] leading-relaxed text-ink-600 sm:text-[17px]"
           >
@@ -146,7 +142,7 @@ export function CinematicHero() {
             campaigns you can actually use.
           </p>
 
-          <div data-hero-fade data-hero-cta>
+          <div data-hero-cta>
             <div className="mt-8 flex flex-wrap items-center gap-4">
               <Link to="/generate">
                 <Button size="lg" className="group">
