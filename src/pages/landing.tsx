@@ -14,8 +14,8 @@ import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { SplineScene } from '@/components/ui/splite'
 import { Spotlight } from '@/components/ui/spotlight'
-import { EarlyAccessBadge, SiteFooter, SiteHeader } from '@/components/brand'
-import { DashboardPreview } from '@/components/dashboard-preview'
+import { SiteFooter, SiteHeader } from '@/components/brand'
+import { CinematicHero } from '@/components/cinematic-hero'
 import { Reveal } from '@/components/reveal'
 
 const deliverables = [
@@ -78,39 +78,7 @@ export default function LandingPage() {
       </SiteHeader>
 
       <main className="flex-1">
-        {/* Hero */}
-        <section className="relative overflow-hidden border-b border-ink-200/70">
-          <div className="pointer-events-none absolute inset-0 bg-grid [mask-image:radial-gradient(70%_55%_at_50%_0%,black,transparent)]" />
-          <div className="relative mx-auto grid max-w-6xl gap-12 px-5 py-16 sm:px-8 sm:py-20 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.05fr)] lg:items-center lg:gap-14 lg:py-24">
-            <div className="animate-fade-up">
-              <EarlyAccessBadge />
-              <h1 className="mt-5 text-[38px] font-semibold leading-[1.05] tracking-tighter text-ink-900 sm:text-[52px] lg:text-[56px]">
-                Turn your business
-                <br className="hidden sm:block" /> into a growth plan.
-              </h1>
-              <p className="mt-5 max-w-md text-[16px] leading-relaxed text-ink-600 sm:text-[17px]">
-                Tell us about your business. We'll turn it into practical marketing ideas, content
-                and campaigns you can actually use.
-              </p>
-              <div className="mt-8 flex flex-wrap items-center gap-4">
-                <Link to="/generate">
-                  <Button size="lg" className="group">
-                    Build My Growth Pack
-                    <ArrowRight className="h-4 w-4 transition-transform duration-200 group-hover:translate-x-0.5" />
-                  </Button>
-                </Link>
-                <span className="text-[13px] text-ink-500">Free early access</span>
-              </div>
-              <p className="mt-6 text-[13px] text-ink-400">
-                No sign up. No credit card. Your pack is ready in under a minute.
-              </p>
-            </div>
-
-            <div className="animate-fade-up [animation-delay:120ms]">
-              <DashboardPreview />
-            </div>
-          </div>
-        </section>
+        <CinematicHero />
 
         {/* How it works */}
         <section className="border-b border-ink-200/70">
